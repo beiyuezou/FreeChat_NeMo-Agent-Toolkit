@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeChat - 无障碍双向交流应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #5B5FCF;
+            --secondary-color: #4CAF50;
+            --danger-color: #FF5252;
+            --warning-color: #FFA726;
+            --info-color: #29B6F6;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F5F5;
+            --border-color: #E0E0E0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.15);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .accessibility-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .accessibility-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .accessibility-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .accessibility-btn:focus {
+            outline: 3px solid #FFD700;
+            outline-offset: 2px;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 200px);
+            max-height: 700px;
+        }
+
+        .sidebar {
+            width: 80px;
+            background: var(--bg-secondary);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: white;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-btn.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .nav-btn:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .module-container {
+            display: none;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .module-container.active {
+            display: block;
+        }
+
+        /* 画布模块 */
+        .canvas-module {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .canvas-toolbar {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+        }
+
+        .brush-size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brush-size-slider {
+            width: 150px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .brush-size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .canvas-area {
+            flex: 1;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #drawingCanvas {
+            cursor: crosshair;
+            display: block;
+        }
+
+        .canvas-actions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .action-btn.success {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn:focus {
+            outline: 3px solid currentColor;
+            outline-offset: 2px;
+        }
+
+        /* 计算器模块 */
+        .calculator-module {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .calc-display {
+            background: var(--text-primary);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 32px;
+            font-weight: 300;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .braille-display {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 25px;
+            border-radius: 12px;
+            border: none;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .calc-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .calc-btn:active {
+            transform: scale(0.95);
+        }
+
+        .calc-btn:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .calc-btn.operator {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .calc-btn.equals {
+            background: var(--secondary-color);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .calc-btn.clear {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .calc-btn.zero {
+            grid-column: span 2;
+        }
+
+        .braille-dots {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 10px;
+            opacity: 0.5;
+        }
+
+        /* Emoji模块 */
+        .emoji-module {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .emoji-categories {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .category-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .category-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .emoji-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .emoji-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .emoji-card:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .emoji-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .emoji-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .emoji-number {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 图标系统模块 */
+        .icon-module {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .icon-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .icon-category {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-category:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .icon-category:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .category-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .category-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 文字转图画模块 */
+        .text-to-image-module {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .input-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .convert-btn {
+            margin-top: 15px;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .convert-btn:hover {
+            background: #4B4FCF;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .convert-btn:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .result-section {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .result-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .result-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .result-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .result-icon {
+            font-size: 32px;
+        }
+
+        .result-text {
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+                max-height: none;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                padding: 10px;
+                overflow-x: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-btn {
+                min-width: 60px;
+            }
+
+            .accessibility-controls {
+                position: static;
+                margin-top: 10px;
+                justify-content: center;
+            }
+
+            .emoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+
+            .icon-categories {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+
+        /* 高对比度模式 */
+        body.high-contrast {
+            --primary-color: #000080;
+            --secondary-color: #008000;
+            --danger-color: #FF0000;
+            --warning-color: #FFA500;
+            --text-primary: #000000;
+            --text-secondary: #333333;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #FFFF00;
+            --border-color: #000000;
+        }
+
+        body.high-contrast .app-header {
+            background: #000080;
+        }
+
+        body.high-contrast .nav-btn {
+            border-width: 3px;
+        }
+
+        body.high-contrast .action-btn {
+            font-weight: bold;
+            border: 2px solid currentColor;
+        }
+
+        /* 动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* 提示信息 */
+        .tooltip {
+            position: absolute;
+            background: var(--text-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Loading 状态 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 快速操作面板 */
+        .quick-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .quick-action-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s;
+        }
+
+        .quick-action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .quick-action-btn:focus {
+            outline: 3px solid #FFD700;
+            outline-offset: 2px;
+        }
+
+        /* 声音反馈指示器 */
+        .sound-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .sound-indicator.active {
+            display: flex;
+            animation: soundPulse 0.5s ease-out;
+        }
+
+        @keyframes soundPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="accessibility-controls">
+                <button class="accessibility-btn" id="fontSizeBtn" title="调整字体大小" aria-label="调整字体大小">A+</button>
+                <button class="accessibility-btn" id="contrastBtn" title="高对比度模式" aria-label="切换高对比度模式">◐</button>
+                <button class="accessibility-btn" id="soundBtn" title="声音反馈" aria-label="切换声音反馈">🔊</button>
+            </div>
+            <h1 class="app-title">
+                🎨 FreeChat 无障碍交流 🤝
+            </h1>
+            <p class="app-subtitle">让沟通无障碍，让世界更美好</p>
+        </header>
+
+        <div class="main-content">
+            <nav class="sidebar" role="navigation" aria-label="主导航">
+                <button class="nav-btn active" data-module="canvas" aria-label="画布" title="画布绘图">
+                    <span class="nav-icon">🎨</span>
+                    <span>画布</span>
+                </button>
+                <button class="nav-btn" data-module="calculator" aria-label="计算器" title="无障碍计算器">
+                    <span class="nav-icon">🔢</span>
+                    <span>计算</span>
+                </button>
+                <button class="nav-btn" data-module="emoji" aria-label="表情" title="表情选择器">
+                    <span class="nav-icon">😊</span>
+                    <span>表情</span>
+                </button>
+                <button class="nav-btn" data-module="icons" aria-label="图标" title="生活场景图标">
+                    <span class="nav-icon">🏠</span>
+                    <span>图标</span>
+                </button>
+                <button class="nav-btn" data-module="text2image" aria-label="文字转图" title="文字转图画">
+                    <span class="nav-icon">💬</span>
+                    <span>转换</span>
+                </button>
+            </nav>
+
+            <main class="content-area" role="main">
+                <!-- 画布模块 -->
+                <div class="module-container canvas-module active" id="canvasModule">
+                    <div class="canvas-toolbar">
+                        <div class="color-palette">
+                            <span>选择颜色：</span>
+                            <button class="color-btn active" style="background: #000000" data-color="#000000" aria-label="黑色"></button>
+                            <button class="color-btn" style="background: #FF0000" data-color="#FF0000" aria-label="红色"></button>
+                            <button class="color-btn" style="background: #FFA500" data-color="#FFA500" aria-label="橙色"></button>
+                            <button class="color-btn" style="background: #FFFF00" data-color="#FFFF00" aria-label="黄色"></button>
+                            <button class="color-btn" style="background: #00FF00" data-color="#00FF00" aria-label="绿色"></button>
+                            <button class="color-btn" style="background: #0000FF" data-color="#0000FF" aria-label="蓝色"></button>
+                            <button class="color-btn" style="background: #800080" data-color="#800080" aria-label="紫色"></button>
+                            <button class="color-btn" style="background: #FF1493" data-color="#FF1493" aria-label="粉色"></button>
+                        </div>
+                        <div class="brush-size-control">
+                            <span>画笔大小：</span>
+                            <input type="range" class="brush-size-slider" id="brushSize" min="1" max="50" value="5" aria-label="画笔大小">
+                            <span id="brushSizeValue">5</span>
+                        </div>
+                    </div>
+                    <div class="canvas-area">
+                        <canvas id="drawingCanvas" aria-label="绘图画布"></canvas>
+                        <div class="canvas-actions">
+                            <button class="action-btn danger" id="clearCanvas" aria-label="清除画布">
+                                🗑️ 清除
+                            </button>
+                            <button class="action-btn success" id="saveCanvas" aria-label="保存画布">
+                                💾 保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 计算器模块 -->
+                <div class="module-container calculator-module" id="calculatorModule">
+                    <div class="calc-display" role="textbox" aria-label="计算器显示屏">
+                        <span class="braille-display">⠼⠚</span>
+                        <span id="calcDisplay">0</span>
+                    </div>
+                    <div class="calc-buttons" role="group" aria-label="计算器按键">
+                        <button class="calc-btn clear" data-action="clear" aria-label="清除">
+                            C
+                            <span class="braille-dots">⠉</span>
+                        </button>
+                        <button class="calc-btn operator" data-action="divide" aria-label="除">
+                            ÷
+                            <span class="braille-dots">⠌</span>
+                        </button>
+                        <button class="calc-btn operator" data-action="multiply" aria-label="乘">
+                            ×
+                            <span class="braille-dots">⠡</span>
+                        </button>
+                        <button class="calc-btn operator" data-action="subtract" aria-label="减">
+                            -
+                            <span class="braille-dots">⠤</span>
+                        </button>
+                        <button class="calc-btn" data-number="7" aria-label="7">
+                            7
+                            <span class="braille-dots">⠼⠛</span>
+                        </button>
+                        <button class="calc-btn" data-number="8" aria-label="8">
+                            8
+                            <span class="braille-dots">⠼⠓</span>
+                        </button>
+                        <button class="calc-btn" data-number="9" aria-label="9">
+                            9
+                            <span class="braille-dots">⠼⠊</span>
+                        </button>
+                        <button class="calc-btn operator" data-action="add" aria-label="加" style="grid-row: span 2;">
+                            +
+                            <span class="braille-dots">⠬</span>
+                        </button>
+                        <button class="calc-btn" data-number="4" aria-label="4">
+                            4
+                            <span class="braille-dots">⠼⠙</span>
+                        </button>
+                        <button class="calc-btn" data-number="5" aria-label="5">
+                            5
+                            <span class="braille-dots">⠼⠑</span>
+                        </button>
+                        <button class="calc-btn" data-number="6" aria-label="6">
+                            6
+                            <span class="braille-dots">⠼⠋</span>
+                        </button>
+                        <button class="calc-btn" data-number="1" aria-label="1">
+                            1
+                            <span class="braille-dots">⠼⠁</span>
+                        </button>
+                        <button class="calc-btn" data-number="2" aria-label="2">
+                            2
+                            <span class="braille-dots">⠼⠃</span>
+                        </button>
+                        <button class="calc-btn" data-number="3" aria-label="3">
+                            3
+                            <span class="braille-dots">⠼⠉</span>
+                        </button>
+                        <button class="calc-btn equals" data-action="equals" aria-label="等于" style="grid-row: span 2;">
+                            =
+                            <span class="braille-dots">⠨⠅</span>
+                        </button>
+                        <button class="calc-btn zero" data-number="0" aria-label="0">
+                            0
+                            <span class="braille-dots">⠼⠚</span>
+                        </button>
+                        <button class="calc-btn" data-action="decimal" aria-label="小数点">
+                            .
+                            <span class="braille-dots">⠲</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Emoji模块 -->
+                <div class="module-container emoji-module" id="emojiModule">
+                    <div class="emoji-categories">
+                        <button class="category-btn active" data-category="emotions">基本情感</button>
+                        <button class="category-btn" data-category="daily">日常需求</button>
+                        <button class="category-btn" data-category="social">社交表达</button>
+                        <button class="category-btn" data-category="emergency">紧急情况</button>
+                    </div>
+                    <div class="emoji-grid" id="emojiGrid">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 图标系统模块 -->
+                <div class="module-container icon-module" id="iconsModule">
+                    <div class="icon-categories">
+                        <div class="icon-category" tabindex="0" data-category="food" aria-label="饮食用餐">
+                            <div class="category-icon">🍽️</div>
+                            <div class="category-name">饮食用餐</div>
+                            <div class="category-desc">吃饭、喝水、餐具</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="sleep" aria-label="睡眠休息">
+                            <div class="category-icon">🛏️</div>
+                            <div class="category-name">睡眠休息</div>
+                            <div class="category-desc">睡觉、休息、疲劳</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="hygiene" aria-label="洗漱清洁">
+                            <div class="category-icon">🚿</div>
+                            <div class="category-name">洗漱清洁</div>
+                            <div class="category-desc">洗澡、刷牙、上厕所</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="transport" aria-label="出行交通">
+                            <div class="category-icon">🚗</div>
+                            <div class="category-name">出行交通</div>
+                            <div class="category-desc">开车、公交、步行</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="shopping" aria-label="购物消费">
+                            <div class="category-icon">🛒</div>
+                            <div class="category-name">购物消费</div>
+                            <div class="category-desc">购物、付钱、买东西</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="medical" aria-label="医疗健康">
+                            <div class="category-icon">🏥</div>
+                            <div class="category-name">医疗健康</div>
+                            <div class="category-desc">医院、吃药、看病</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="entertainment" aria-label="娱乐活动">
+                            <div class="category-icon">🎮</div>
+                            <div class="category-name">娱乐活动</div>
+                            <div class="category-desc">游戏、音乐、电影</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="communication" aria-label="通讯联系">
+                            <div class="category-icon">📱</div>
+                            <div class="category-name">通讯联系</div>
+                            <div class="category-desc">打电话、发消息、视频</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="emergency" aria-label="紧急求助">
+                            <div class="category-icon">🆘</div>
+                            <div class="category-name">紧急求助</div>
+                            <div class="category-desc">求助、报警、危险</div>
+                        </div>
+                        <div class="icon-category" tabindex="0" data-category="housework" aria-label="家务劳动">
+                            <div class="category-icon">🧹</div>
+                            <div class="category-name">家务劳动</div>
+                            <div class="category-desc">打扫、洗衣、做饭</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文字转图画模块 -->
+                <div class="module-container text-to-image-module" id="text2imageModule">
+                    <div class="input-section">
+                        <textarea 
+                            class="text-input" 
+                            id="textInput" 
+                            placeholder="输入文字，自动转换为直观的图画...&#10;例如：我想吃饭、我要上厕所、我很开心"
+                            aria-label="输入要转换的文字"></textarea>
+                        <button class="convert-btn" id="convertBtn" aria-label="转换为图画">
+                            🔄 转换为图画
+                        </button>
+                    </div>
+                    <div class="result-section">
+                        <div class="result-header">图画结果</div>
+                        <div class="result-content" id="resultContent">
+                            <p style="color: #999;">请在上方输入文字，点击转换按钮</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 快速操作按钮 -->
+    <div class="quick-actions">
+        <button class="quick-action-btn" id="sosBtn" aria-label="紧急求助" title="紧急求助">
+            🆘
+        </button>
+    </div>
+
+    <!-- 声音反馈指示器 -->
+    <div class="sound-indicator" id="soundIndicator">
+        🔊
+    </div>
+
+    <script>
+        // 应用主控制器
+        class FreeChatApp {
+            constructor() {
+                this.currentModule = 'canvas';
+                this.soundEnabled = true;
+                this.highContrast = false;
+                this.fontSize = 'normal';
+                this.audioContext = null;
+                this.init();
+            }
+
+            init() {
+                this.initNavigation();
+                this.initAccessibility();
+                this.initCanvas();
+                this.initCalculator();
+                this.initEmoji();
+                this.initIcons();
+                this.initText2Image();
+                this.initQuickActions();
+                this.initKeyboardShortcuts();
+            }
+
+            // 导航控制
+            initNavigation() {
+                const navButtons = document.querySelectorAll('.nav-btn');
+                navButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.switchModule(btn.dataset.module);
+                        this.updateNavigation(btn);
+                    });
+                });
+            }
+
+            switchModule(moduleName) {
+                const modules = document.querySelectorAll('.module-container');
+                modules.forEach(module => {
+                    module.classList.remove('active');
+                });
+                const targetModule = document.getElementById(moduleName + 'Module');
+                if (targetModule) {
+                    targetModule.classList.add('active');
+                    this.currentModule = moduleName;
+                    this.playSound('switch');
+                    this.announce(`已切换到${this.getModuleName(moduleName)}模块`);
+                }
+            }
+
+            updateNavigation(activeBtn) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                activeBtn.classList.add('active');
+            }
+
+            getModuleName(module) {
+                const names = {
+                    canvas: '画布',
+                    calculator: '计算器',
+                    emoji: '表情',
+                    icons: '图标',
+                    text2image: '文字转图画'
+                };
+                return names[module] || module;
+            }
+
+            // 无障碍功能
+            initAccessibility() {
+                // 字体大小调整
+                document.getElementById('fontSizeBtn').addEventListener('click', () => {
+                    this.toggleFontSize();
+                });
+
+                // 高对比度模式
+                document.getElementById('contrastBtn').addEventListener('click', () => {
+                    this.toggleHighContrast();
+                });
+
+                // 声音反馈
+                document.getElementById('soundBtn').addEventListener('click', () => {
+                    this.toggleSound();
+                });
+            }
+
+            toggleFontSize() {
+                const sizes = ['normal', 'large', 'x-large'];
+                const currentIndex = sizes.indexOf(this.fontSize);
+                const nextIndex = (currentIndex + 1) % sizes.length;
+                this.fontSize = sizes[nextIndex];
+                
+                const scale = {
+                    'normal': '1',
+                    'large': '1.2',
+                    'x-large': '1.4'
+                };
+                
+                document.documentElement.style.fontSize = scale[this.fontSize] + 'em';
+                this.playSound('click');
+                this.announce(`字体大小已调整为${this.fontSize === 'normal' ? '正常' : this.fontSize === 'large' ? '大' : '超大'}`);
+            }
+
+            toggleHighContrast() {
+                this.highContrast = !this.highContrast;
+                document.body.classList.toggle('high-contrast');
+                this.playSound('click');
+                this.announce(`高对比度模式已${this.highContrast ? '开启' : '关闭'}`);
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                const soundBtn = document.getElementById('soundBtn');
+                soundBtn.textContent = this.soundEnabled ? '🔊' : '🔇';
+                this.playSound('click');
+                this.announce(`声音反馈已${this.soundEnabled ? '开启' : '关闭'}`);
+            }
+
+            // 画布功能
+            initCanvas() {
+                const canvas = document.getElementById('drawingCanvas');
+                const ctx = canvas.getContext('2d');
+                let isDrawing = false;
+                let currentColor = '#000000';
+                let currentSize = 5;
+
+                // 设置画布大小
+                const resizeCanvas = () => {
+                    const container = canvas.parentElement;
+                    canvas.width = container.clientWidth;
+                    canvas.height = container.clientHeight - 60;
+                };
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+
+                // 颜色选择
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentColor = btn.dataset.color;
+                        this.playSound('click');
+                    });
+                });
+
+                // 画笔大小
+                const brushSizeSlider = document.getElementById('brushSize');
+                const brushSizeValue = document.getElementById('brushSizeValue');
+                brushSizeSlider.addEventListener('input', (e) => {
+                    currentSize = e.target.value;
+                    brushSizeValue.textContent = currentSize;
+                });
+
+                // 绘图功能
+                const startDrawing = (e) => {
+                    isDrawing = true;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                };
+
+                const draw = (e) => {
+                    if (!isDrawing) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                    
+                    ctx.lineWidth = currentSize;
+                    ctx.strokeStyle = currentColor;
+                    ctx.lineCap = 'round';
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                };
+
+                const stopDrawing = () => {
+                    isDrawing = false;
+                };
+
+                // 鼠标事件
+                canvas.addEventListener('mousedown', startDrawing);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stopDrawing);
+                canvas.addEventListener('mouseout', stopDrawing);
+
+                // 触摸事件
+                canvas.addEventListener('touchstart', startDrawing);
+                canvas.addEventListener('touchmove', draw);
+                canvas.addEventListener('touchend', stopDrawing);
+
+                // 清除画布
+                document.getElementById('clearCanvas').addEventListener('click', () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    this.playSound('clear');
+                    this.announce('画布已清除');
+                });
+
+                // 保存画布
+                document.getElementById('saveCanvas').addEventListener('click', () => {
+                    const link = document.createElement('a');
+                    link.download = 'freechat-drawing.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    this.playSound('success');
+                    this.announce('画布已保存');
+                });
+            }
+
+            // 计算器功能
+            initCalculator() {
+                const display = document.getElementById('calcDisplay');
+                let currentValue = '0';
+                let previousValue = '';
+                let operation = null;
+                let shouldResetDisplay = false;
+
+                const updateDisplay = () => {
+                    display.textContent = currentValue;
+                    const brailleDisplay = document.querySelector('.braille-display');
+                    brailleDisplay.textContent = this.toBraille(currentValue);
+                };
+
+                const handleNumber = (num) => {
+                    if (shouldResetDisplay) {
+                        currentValue = '';
+                        shouldResetDisplay = false;
+                    }
+                    if (currentValue === '0') {
+                        currentValue = num;
+                    } else {
+                        currentValue += num;
+                    }
+                    updateDisplay();
+                    this.playSound('click');
+                };
+
+                const handleOperation = (op) => {
+                    if (operation && !shouldResetDisplay) {
+                        calculate();
+                    }
+                    previousValue = currentValue;
+                    operation = op;
+                    shouldResetDisplay = true;
+                    this.playSound('click');
+                };
+
+                const calculate = () => {
+                    const prev = parseFloat(previousValue);
+                    const current = parseFloat(currentValue);
+                    let result = 0;
+
+                    switch (operation) {
+                        case 'add':
+                            result = prev + current;
+                            break;
+                        case 'subtract':
+                            result = prev - current;
+                            break;
+                        case 'multiply':
+                            result = prev * current;
+                            break;
+                        case 'divide':
+                            result = prev / current;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    currentValue = result.toString();
+                    operation = null;
+                    previousValue = '';
+                    shouldResetDisplay = true;
+                    updateDisplay();
+                    this.playSound('success');
+                    this.announce(`结果是 ${result}`);
+                };
+
+                const clear = () => {
+                    currentValue = '0';
+                    previousValue = '';
+                    operation = null;
+                    shouldResetDisplay = false;
+                    updateDisplay();
+                    this.playSound('clear');
+                };
+
+                // 事件绑定
+                document.querySelectorAll('.calc-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.dataset.number) {
+                            handleNumber(btn.dataset.number);
+                        } else if (btn.dataset.action) {
+                            const action = btn.dataset.action;
+                            if (action === 'clear') {
+                                clear();
+                            } else if (action === 'equals') {
+                                calculate();
+                            } else if (action === 'decimal') {
+                                if (!currentValue.includes('.')) {
+                                    currentValue += '.';
+                                    updateDisplay();
+                                }
+                            } else {
+                                handleOperation(action);
+                            }
+                        }
+                    });
+                });
+
+                // 键盘支持
+                document.addEventListener('keydown', (e) => {
+                    if (this.currentModule !== 'calculator') return;
+                    
+                    if (e.key >= '0' && e.key <= '9') {
+                        handleNumber(e.key);
+                    } else if (e.key === '.') {
+                        if (!currentValue.includes('.')) {
+                            currentValue += '.';
+                            updateDisplay();
+                        }
+                    } else if (e.key === '+') {
+                        handleOperation('add');
+                    } else if (e.key === '-') {
+                        handleOperation('subtract');
+                    } else if (e.key === '*') {
+                        handleOperation('multiply');
+                    } else if (e.key === '/') {
+                        handleOperation('divide');
+                    } else if (e.key === 'Enter' || e.key === '=') {
+                        calculate();
+                    } else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
+                        clear();
+                    }
+                });
+            }
+
+            // Emoji功能
+            initEmoji() {
+                const emojiData = {
+                    emotions: [
+                        { icon: '😊', label: '开心', number: 1 },
+                        { icon: '😢', label: '难过', number: 2 },
+                        { icon: '😡', label: '生气', number: 3 },
+                        { icon: '😴', label: '困了', number: 4 },
+                        { icon: '😍', label: '喜欢', number: 5 },
+                        { icon: '😰', label: '紧张', number: 6 },
+                        { icon: '🤔', label: '思考', number: 7 },
+                        { icon: '😷', label: '不舒服', number: 8 },
+                        { icon: '🥳', label: '庆祝', number: 9 }
+                    ],
+                    daily: [
+                        { icon: '🍔', label: '吃饭', number: 1 },
+                        { icon: '💧', label: '喝水', number: 2 },
+                        { icon: '🚽', label: '厕所', number: 3 },
+                        { icon: '🛁', label: '洗澡', number: 4 },
+                        { icon: '🛏️', label: '睡觉', number: 5 },
+                        { icon: '👕', label: '换衣服', number: 6 },
+                        { icon: '🚶', label: '散步', number: 7 },
+                        { icon: '📚', label: '学习', number: 8 },
+                        { icon: '💊', label: '吃药', number: 9 }
+                    ],
+                    social: [
+                        { icon: '👋', label: '你好', number: 1 },
+                        { icon: '🙏', label: '谢谢', number: 2 },
+                        { icon: '👍', label: '好的', number: 3 },
+                        { icon: '👎', label: '不好', number: 4 },
+                        { icon: '✋', label: '等等', number: 5 },
+                        { icon: '🤝', label: '合作', number: 6 },
+                        { icon: '💝', label: '礼物', number: 7 },
+                        { icon: '📞', label: '打电话', number: 8 },
+                        { icon: '📧', label: '发消息', number: 9 }
+                    ],
+                    emergency: [
+                        { icon: '🆘', label: '求救', number: 1 },
+                        { icon: '🚨', label: '紧急', number: 2 },
+                        { icon: '🏥', label: '医院', number: 3 },
+                        { icon: '🚑', label: '救护车', number: 4 },
+                        { icon: '👮', label: '警察', number: 5 },
+                        { icon: '🔥', label: '火警', number: 6 },
+                        { icon: '⚠️', label: '危险', number: 7 },
+                        { icon: '🩹', label: '受伤', number: 8 },
+                        { icon: '💔', label: '心痛', number: 9 }
+                    ]
+                };
+
+                let currentCategory = 'emotions';
+
+                const renderEmojis = (category) => {
+                    const grid = document.getElementById('emojiGrid');
+                    grid.innerHTML = '';
+                    
+                    emojiData[category].forEach(emoji => {
+                        const card = document.createElement('div');
+                        card.className = 'emoji-card';
+                        card.tabIndex = 0;
+                        card.innerHTML = `
+                            <div class="emoji-number">${emoji.number}</div>
+                            <div class="emoji-icon">${emoji.icon}</div>
+                            <div class="emoji-label">${emoji.label}</div>
+                        `;
+                        
+                        card.addEventListener('click', () => {
+                            this.selectEmoji(emoji);
+                        });
+                        
+                        card.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                this.selectEmoji(emoji);
+                            }
+                        });
+                        
+                        grid.appendChild(card);
+                    });
+                };
+
+                // 分类切换
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentCategory = btn.dataset.category;
+                        renderEmojis(currentCategory);
+                        this.playSound('click');
+                    });
+                });
+
+                // 数字键快捷选择
+                document.addEventListener('keydown', (e) => {
+                    if (this.currentModule !== 'emoji') return;
+                    
+                    const num = parseInt(e.key);
+                    if (num >= 1 && num <= 9) {
+                        const emoji = emojiData[currentCategory].find(em => em.number === num);
+                        if (emoji) {
+                            this.selectEmoji(emoji);
+                        }
+                    }
+                });
+
+                renderEmojis(currentCategory);
+            }
+
+            selectEmoji(emoji) {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(emoji.icon).then(() => {
+                    this.playSound('success');
+                    this.announce(`已选择${emoji.label}表情 ${emoji.icon}`);
+                    this.showNotification(`已复制: ${emoji.icon} ${emoji.label}`);
+                });
+            }
+
+            // 图标系统
+            initIcons() {
+                const iconCategories = document.querySelectorAll('.icon-category');
+                
+                iconCategories.forEach(category => {
+                    category.addEventListener('click', () => {
+                        this.openIconCategory(category.dataset.category);
+                    });
+                    
+                    category.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            this.openIconCategory(category.dataset.category);
+                        }
+                    });
+                });
+            }
+
+            openIconCategory(category) {
+                this.playSound('click');
+                this.announce(`已打开${this.getCategoryName(category)}分类`);
+                this.showNotification(`功能开发中: ${this.getCategoryName(category)}`);
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    food: '饮食用餐',
+                    sleep: '睡眠休息',
+                    hygiene: '洗漱清洁',
+                    transport: '出行交通',
+                    shopping: '购物消费',
+                    medical: '医疗健康',
+                    entertainment: '娱乐活动',
+                    communication: '通讯联系',
+                    emergency: '紧急求助',
+                    housework: '家务劳动'
+                };
+                return names[category] || category;
+            }
+
+            // 文字转图画
+            initText2Image() {
+                const textInput = document.getElementById('textInput');
+                const convertBtn = document.getElementById('convertBtn');
+                const resultContent = document.getElementById('resultContent');
+
+                const keywordMap = {
+                    '吃饭': ['🍽️', '🍔', '🥢'],
+                    '喝水': ['💧', '🥤', '☕'],
+                    '厕所': ['🚽', '🚻', '🧻'],
+                    '上厕所': ['🚽', '🚻', '🧻'],
+                    '睡觉': ['😴', '🛏️', '💤'],
+                    '累了': ['😫', '😴', '💤'],
+                    '休息': ['😌', '🛋️', '☕'],
+                    '开心': ['😊', '😄', '🎉'],
+                    '生气': ['😡', '😠', '💢'],
+                    '难过': ['😢', '😭', '💔'],
+                    '害怕': ['😨', '😰', '😱'],
+                    '医生': ['👨‍⚕️', '🏥', '💊'],
+                    '看医生': ['🏥', '👨‍⚕️', '🩺'],
+                    '吃药': ['💊', '💉', '🏥'],
+                    '帮助': ['🆘', '🤝', '💪'],
+                    '帮忙': ['🤝', '🆘', '👐'],
+                    '谢谢': ['🙏', '😊', '💝'],
+                    '对不起': ['🙏', '😔', '💔'],
+                    '没关系': ['👌', '😊', '🤝'],
+                    '好的': ['👍', '✅', '😊'],
+                    '不好': ['👎', '❌', '😔'],
+                    '危险': ['⚠️', '🚨', '⛔'],
+                    '小心': ['⚠️', '👀', '🚸'],
+                    '等等': ['✋', '⏸️', '🕐'],
+                    '快点': ['⏩', '🏃', '⚡'],
+                    '慢点': ['🐌', '⏪', '🚶'],
+                    '热': ['🔥', '☀️', '🥵'],
+                    '冷': ['❄️', '🥶', '🧊'],
+                    '下雨': ['🌧️', '☔', '💧'],
+                    '晴天': ['☀️', '🌞', '😎'],
+                    '回家': ['🏠', '🚶', '🔙'],
+                    '上班': ['💼', '🏢', '👔'],
+                    '上学': ['🎒', '🏫', '📚'],
+                    '钱': ['💰', '💵', '💳'],
+                    '付钱': ['💳', '💰', '🤝'],
+                    '买东西': ['🛒', '💳', '🛍️'],
+                    '电话': ['📞', '📱', '☎️'],
+                    '打电话': ['📞', '📱', '🤙'],
+                    '拍照': ['📷', '📸', '🤳'],
+                    '音乐': ['🎵', '🎶', '🎧'],
+                    '跳舞': ['💃', '🕺', '🎶'],
+                    '运动': ['🏃', '⚽', '🏋️'],
+                    '游泳': ['🏊', '🌊', '🏖️'],
+                    '开车': ['🚗', '🚙', '🛣️'],
+                    '坐车': ['🚌', '🚕', '🚇'],
+                    '飞机': ['✈️', '🛫', '🛬'],
+                    '火车': ['🚂', '🚆', '🚄'],
+                    '迷路': ['🗺️', '❓', '🧭'],
+                    '找不到': ['❓', '🔍', '😕'],
+                    '在哪里': ['📍', '🗺️', '❓'],
+                    '这里': ['📍', '👇', '🏠'],
+                    '那里': ['👉', '📍', '🗺️'],
+                    '生日': ['🎂', '🎉', '🎁'],
+                    '礼物': ['🎁', '💝', '🎀'],
+                    '爱': ['❤️', '💕', '😍'],
+                    '朋友': ['👫', '🤝', '😊'],
+                    '家人': ['👨‍👩‍👧‍👦', '🏠', '❤️'],
+                    '工作': ['💼', '💻', '📊'],
+                    '电脑': ['💻', '🖥️', '⌨️'],
+                    '手机': ['📱', '📲', '📞'],
+                    '书': ['📚', '📖', '📕'],
+                    '笔': ['✏️', '🖊️', '📝'],
+                    '纸': ['📄', '📃', '🗒️']
+                };
+
+                convertBtn.addEventListener('click', () => {
+                    const text = textInput.value.trim();
+                    if (!text) {
+                        this.showNotification('请输入要转换的文字');
+                        return;
+                    }
+
+                    const results = [];
+                    
+                    // 分析文本，查找关键词
+                    for (const [keyword, icons] of Object.entries(keywordMap)) {
+                        if (text.includes(keyword)) {
+                            results.push({
+                                keyword,
+                                icons,
+                                confidence: 0.8 + Math.random() * 0.2
+                            });
+                        }
+                    }
+
+                    // 如果没有找到匹配，尝试模糊匹配
+                    if (results.length === 0) {
+                        // 简单的情感分析
+                        if (text.includes('好') || text.includes('棒') || text.includes('赞')) {
+                            results.push({
+                                keyword: '积极',
+                                icons: ['👍', '😊', '✨'],
+                                confidence: 0.6
+                            });
+                        } else if (text.includes('不') || text.includes('坏') || text.includes('差')) {
+                            results.push({
+                                keyword: '消极',
+                                icons: ['👎', '😔', '💔'],
+                                confidence: 0.6
+                            });
+                        } else {
+                            results.push({
+                                keyword: '未识别',
+                                icons: ['❓', '🤔', '💭'],
+                                confidence: 0.3
+                            });
+                        }
+                    }
+
+                    // 显示结果
+                    this.displayConversionResults(results, text);
+                    this.playSound('success');
+                });
+
+                // Enter键触发转换
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        convertBtn.click();
+                    }
+                });
+            }
+
+            displayConversionResults(results, originalText) {
+                const resultContent = document.getElementById('resultContent');
+                resultContent.innerHTML = '';
+
+                const header = document.createElement('div');
+                header.innerHTML = `<strong>原文:</strong> ${originalText}`;
+                header.style.marginBottom = '15px';
+                resultContent.appendChild(header);
+
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerHTML = `
+                        <span class="result-icon">${result.icons[0]}</span>
+                        <span class="result-text">
+                            <strong>${result.keyword}</strong>
+                            <br>
+                            候选: ${result.icons.join(' ')}
+                            <br>
+                            <small>置信度: ${(result.confidence * 100).toFixed(0)}%</small>
+                        </span>
+                    `;
+                    
+                    resultItem.addEventListener('click', () => {
+                        navigator.clipboard.writeText(result.icons[0]);
+                        this.showNotification(`已复制: ${result.icons[0]}`);
+                        this.playSound('success');
+                    });
+                    
+                    resultContent.appendChild(resultItem);
+                });
+
+                this.announce(`已将文字转换为${results.length}个图画结果`);
+            }
+
+            // 快速操作
+            initQuickActions() {
+                document.getElementById('sosBtn').addEventListener('click', () => {
+                    this.showEmergencyDialog();
+                });
+            }
+
+            showEmergencyDialog() {
+                if (confirm('是否需要紧急求助？\n\n点击确定将发送求助信息')) {
+                    this.playSound('alert');
+                    this.announce('紧急求助已发送');
+                    this.showNotification('⚠️ 紧急求助信息已发送！');
+                }
+            }
+
+            // 键盘快捷键
+            initKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Alt + 数字键切换模块
+                    if (e.altKey) {
+                        const moduleMap = {
+                            '1': 'canvas',
+                            '2': 'calculator',
+                            '3': 'emoji',
+                            '4': 'icons',
+                            '5': 'text2image'
+                        };
+                        
+                        if (moduleMap[e.key]) {
+                            const btn = document.querySelector(`[data-module="${moduleMap[e.key]}"]`);
+                            if (btn) {
+                                btn.click();
+                            }
+                        }
+                    }
+                    
+                    // Ctrl + S 保存
+                    if (e.ctrlKey && e.key === 's') {
+                        e.preventDefault();
+                        if (this.currentModule === 'canvas') {
+                            document.getElementById('saveCanvas').click();
+                        }
+                    }
+                    
+                    // ESC 清除
+                    if (e.key === 'Escape') {
+                        if (this.currentModule === 'canvas') {
+                            document.getElementById('clearCanvas').click();
+                        }
+                    }
+                });
+            }
+
+            // 辅助功能
+            playSound(type) {
+                if (!this.soundEnabled) return;
+                
+                // 显示声音指示器
+                const indicator = document.getElementById('soundIndicator');
+                indicator.classList.add('active');
+                setTimeout(() => {
+                    indicator.classList.remove('active');
+                }, 500);
+
+                // 使用Web Audio API播放声音
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                const frequencies = {
+                    click: 800,
+                    success: 1000,
+                    error: 400,
+                    alert: 1200,
+                    switch: 600,
+                    clear: 500
+                };
+                
+                oscillator.frequency.value = frequencies[type] || 800;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + 0.1);
+            }
+
+            announce(message) {
+                // 使用屏幕阅读器API
+                const announcement = document.createElement('div');
+                announcement.setAttribute('role', 'alert');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.style.position = 'absolute';
+                announcement.style.left = '-10000px';
+                announcement.textContent = message;
+                document.body.appendChild(announcement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(announcement);
+                }, 1000);
+            }
+
+            showNotification(message, duration = 3000) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    z-index: 10000;
+                    animation: slideDown 0.3s ease-out;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideUp 0.3s ease-out';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, duration);
+            }
+
+            toBraille(text) {
+                // 简单的数字转盲文映射
+                const brailleMap = {
+                    '0': '⠚', '1': '⠁', '2': '⠃', '3': '⠉', '4': '⠙',
+                    '5': '⠑', '6': '⠋', '7': '⠛', '8': '⠓', '9': '⠊',
+                    '.': '⠲', '+': '⠬', '-': '⠤', '*': '⠡', '/': '⠌', '=': '⠨⠅'
+                };
+                
+                return '⠼' + text.split('').map(char => brailleMap[char] || char).join('');
+            }
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    transform: translateX(-50%) translateY(-20px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideUp {
+                from {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(-50%) translateY(-20px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 启动应用
+        window.addEventListener('DOMContentLoaded', () => {
+            new FreeChatApp();
+        });
+    </script>
+</body>
+</html>
