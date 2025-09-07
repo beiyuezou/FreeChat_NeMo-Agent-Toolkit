@@ -51,4 +51,6 @@ UI库：官方NeMo-Agent-Toolkit-UI
 自定义：用户可API密钥、模型名称、配置base_url
 
 
+demolink:file:///Users/zhangao/Downloads/freechat-app.html
+
 
