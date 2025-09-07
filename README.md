@@ -53,5 +53,5 @@ UI库：官方NeMo-Agent-Toolkit-UI
 
 [Demo 链接]( file:///Users/zhangao/Downloads/freechat-app.html)
 
-[![Watch the demo](https://www.youtube.com/shorts/S4VJJ6X3fW4)]
+Demo video:https://www.youtube.com/shorts/S4VJJ6X3fW4
 
