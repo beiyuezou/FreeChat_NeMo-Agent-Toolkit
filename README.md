@@ -20,19 +20,20 @@ mcp：支持上下文协议
 画布
 <img width="462" height="539" alt="image" src="https://github.com/user-attachments/assets/b6aba189-0f9b-46cc-aeb3-c93abd646da4" />
 
+
 无障碍计算器
 <img width="297" height="509" alt="image" src="https://github.com/user-attachments/assets/f2eb7ac8-5e4e-4df6-ac0d-58c79f0d95d7" />
 
 emoji
-<img width="302" height="399" alt="image" src="https://github.com/user-attachments/assets/5f0e9ef7-5bc4-4bc0-ab91-0281a2f65c59" />
+<img width="297" height="509" alt="image" src="https://github.com/user-attachments/assets/5f0e9ef7-5bc4-4bc0-ab91-0281a2f65c59" />
 
 图标
-<img width="606" height="476" alt="image" src="https://github.com/user-attachments/assets/38decfc1-48de-49f4-a404-22115a90e369" />
+<img width="297" height="509" alt="image" src="https://github.com/user-attachments/assets/38decfc1-48de-49f4-a404-22115a90e369" />
 
 
 
 文生图
-<img width="1102" height="464" alt="image" src="https://github.com/user-attachments/assets/50004e51-5c18-4829-b903-a80eb95a7af4" />
+<img width="297" height="509" alt="image" src="https://github.com/user-attachments/assets/50004e51-5c18-4829-b903-a80eb95a7af4" />
 
 
 
