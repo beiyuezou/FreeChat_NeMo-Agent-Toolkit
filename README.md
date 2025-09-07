@@ -58,22 +58,8 @@ mcp：支持上下文协议
 
 
 
-## Agent工作流程
-用户输入
-   ↓
-[协调管理Agent] → 分配任务
-   ↓
-[意图理解Agent] → 理解用户需求
-   ↓
-[情感分析Agent] → 识别情绪状态
-   ↓
-[视觉生成Agent] → 转换为图标/表情
-   ↓
-[翻译转换Agent] → 多模态转换
-   ↓
-[紧急响应Agent] → 处理紧急情况
-   ↓
-智能响应输出
+<img width="596" height="706" alt="image" src="https://github.com/user-attachments/assets/965de45c-3e20-4ad9-a7be-0f11dd574e7d" />
+
 
 
  ## 🏗️技术架构
